@@ -16,37 +16,27 @@ MYSQL_CONF_PATH=$PREFIX/etc/my.cnf
 
 function enable_module() {
     MODULE=$1
-    # VERSION=${2:-7.1}
     PREFIX=`brew --prefix`
-    sed -i'' -e "s,^#[[:space:]]*\(LoadModule ${MODULE} .*\),\1,g" $HTTPD_CONF_PATH
+    gsed -i "s,^#\s*\(LoadModule ${MODULE} .*\),\1,g" $HTTPD_CONF_PATH
 }
 
 function disable_module() {
     MODULE=$1
-    # VERSION=${2:-7.1}
-    sed -i'' -e "s,^\(LoadModule ${MODULE} .*\),# \1,g" $HTTPD_CONF_PATH
+    gsed -i "s,^\(LoadModule ${MODULE} .*\),# \1,g" $HTTPD_CONF_PATH
 }
 
 function enable_include() {
     INCLUDE_PATH=$1
-    # VERSION=${2:-7.1}
-    sed -i'' -e "s,^#[[:space:]]*\(Include ${INCLUDE_PATH} .*\),\1,g" $HTTPD_CONF_PATH
+    gsed -i "s,^#\s*\(Include ${INCLUDE_PATH}\),\1,g" $HTTPD_CONF_PATH
 }
 
 function set_directory_index() {
-    sed -i'' -e "s,DirectoryIndex.*,DirectoryIndex index.php index.html,g" $HTTPD_CONF_PATH
+    gsed -i "s,DirectoryIndex.*,DirectoryIndex index.php index.html,g" $HTTPD_CONF_PATH
 }
 
 function add_server_config() {
-    read -r -d '' CONFIG << EOM
-ServerName localhost\n
-Protocols h2 http/1.1\n
-<IfModule mod_rewrite.c>\n
-    RewriteEngine On\n
-    RewriteOptions Inherit\n
-</IfModule>
-EOM
-    sed -i'' -e '/#ServerName/a\' -e "$CONFIG" $HTTPD_CONF_PATH
+    CONFIG='ServerName localhost\nProtocols h2 http\/1.1\n<IfModule mod_rewrite.c>\nRewriteEngine On\nRewriteOptions Inherit\n<\/IfModule>\n'
+    gsed -i "/^#ServerName/a $CONFIG" $HTTPD_CONF_PATH
 }
 
 function add_includes() {
@@ -55,42 +45,32 @@ function add_includes() {
 }
 
 function comment_ssl_vhost() {
-    START=`sed -n  '\|^<Virtual|=' $HTTPD_SSL_CONF_PATH`
-    END=`sed -n  '\|^</Virtual|=' $HTTPD_SSL_CONF_PATH`
+    START=`gsed -n  '\|^<Virtual|=' $HTTPD_SSL_CONF_PATH`
+    END=`gsed -n  '\|^</Virtual|=' $HTTPD_SSL_CONF_PATH`
     if [ -z "$START" ] || [ -z "$END" ]; then
         return
     fi
-    sed -i'' -e "$START,$END s/^/#/" $HTTPD_SSL_CONF_PATH
+    gsed -i "$START,$END s/^/#/" $HTTPD_SSL_CONF_PATH
 }
 
 function add_mysql_config() {
-    read -r -d '' CONFIG << EOM
-max_connections       = 20\n
-key_buffer_size       = 16K\n
-max_allowed_packet    = 1M\n
-table_open_cache      = 4\n
-sort_buffer_size      = 64K\n
-read_buffer_size      = 256K\n
-read_rnd_buffer_size  = 256K\n
-net_buffer_length     = 2K\n
-thread_stack          = 128K\n
-EOM
+    CONFIG='max_connections       = 20\nkey_buffer_size       = 16K\nmax_allowed_packet    = 1M\ntable_open_cache      = 4\nsort_buffer_size      = 64K\nread_buffer_size      = 256K\nread_rnd_buffer_size  = 256K\nnet_buffer_length     = 2K\nthread_stack          = 128K\n'
     grep -q -F 'max_connections' $MYSQL_CONF_PATH || echo $CONFIG >> $MYSQL_CONF_PATH
 }
 
 function set_php_configs() {
-    sed -i'' -e "s,^listen =.*,listen = 127.0.0.1:9056,g" $PREFIX/etc/php/5.6/php-fpm.conf
-    sed -i'' -e "s,^pm =.*,pm = ondemand,g" $PREFIX/etc/php/5.6/php-fpm.conf
-    sed -i'' -e "s,^pm.max_children =.*,pm.max_children = 10,g" $PREFIX/etc/php/5.6/php-fpm.conf
-    sed -i'' -e "s,^listen =.*,listen = 127.0.0.1:9070,g" $PREFIX/etc/php/7.0/php-fpm.d/www.conf
-    sed -i'' -e "s,^pm =.*,pm = ondemand,g" $PREFIX/etc/php/7.0/php-fpm.d/www.conf
-    sed -i'' -e "s,^pm.max_children =.*,pm.max_children = 10,g" $PREFIX/etc/php/7.0/php-fpm.d/www.conf
-    sed -i'' -e "s,^listen =.*,listen = 127.0.0.1:9071,g" $PREFIX/etc/php/7.1/php-fpm.d/www.conf
-    sed -i'' -e "s,^pm =.*,pm = ondemand,g" $PREFIX/etc/php/7.1/php-fpm.d/www.conf
-    sed -i'' -e "s,^pm.max_children =.*,pm.max_children = 10,g" $PREFIX/etc/php/7.1/php-fpm.d/www.conf
-    sed -i'' -e "s,^listen =.*,listen = 127.0.0.1:9072,g" $PREFIX/etc/php/7.2/php-fpm.d/www.conf
-    sed -i'' -e "s,^pm =.*,pm = ondemand,g" $PREFIX/etc/php/7.2/php-fpm.d/www.conf
-    sed -i'' -e "s,^pm.max_children =.*,pm.max_children = 10,g" $PREFIX/etc/php/7.2/php-fpm.d/www.conf
+    gsed -i "s,^listen =.*,listen = 127.0.0.1:9056,g" $PREFIX/etc/php/5.6/php-fpm.conf
+    gsed -i "s,^pm =.*,pm = ondemand,g" $PREFIX/etc/php/5.6/php-fpm.conf
+    gsed -i "s,^pm.max_children =.*,pm.max_children = 10,g" $PREFIX/etc/php/5.6/php-fpm.conf
+    gsed -i "s,^listen =.*,listen = 127.0.0.1:9070,g" $PREFIX/etc/php/7.0/php-fpm.d/www.conf
+    gsed -i "s,^pm =.*,pm = ondemand,g" $PREFIX/etc/php/7.0/php-fpm.d/www.conf
+    gsed -i "s,^pm.max_children =.*,pm.max_children = 10,g" $PREFIX/etc/php/7.0/php-fpm.d/www.conf
+    gsed -i "s,^listen =.*,listen = 127.0.0.1:9071,g" $PREFIX/etc/php/7.1/php-fpm.d/www.conf
+    gsed -i "s,^pm =.*,pm = ondemand,g" $PREFIX/etc/php/7.1/php-fpm.d/www.conf
+    gsed -i "s,^pm.max_children =.*,pm.max_children = 10,g" $PREFIX/etc/php/7.1/php-fpm.d/www.conf
+    gsed -i "s,^listen =.*,listen = 127.0.0.1:9072,g" $PREFIX/etc/php/7.2/php-fpm.d/www.conf
+    gsed -i "s,^pm =.*,pm = ondemand,g" $PREFIX/etc/php/7.2/php-fpm.d/www.conf
+    gsed -i "s,^pm.max_children =.*,pm.max_children = 10,g" $PREFIX/etc/php/7.2/php-fpm.d/www.conf
 
     
     if [ ! -f $PREFIX/etc/php/7.0/conf.d/ext-opcache.ini ]; then
@@ -111,14 +91,7 @@ function set_php_configs() {
 
 function add_opcache_config() {
     VERSION=$1
-    read -r -d '' CONFIG << EOM
-opcache.revalidate_freq=0\n
-opcache.max_accelerated_files=21001\n
-opcache.memory_consumption=128\n
-opcache.interned_strings_buffer=16\n
-opcache.fast_shutdown=1\n
-EOM
-
+    CONFIG='opcache.revalidate_freq=0\nopcache.max_accelerated_files=21001\nopcache.memory_consumption=128\nopcache.interned_strings_buffer=16\nopcache.fast_shutdown=1\n'
     CONF_PATH=$PREFIX/etc/php/$VERSION/conf.d/ext-opcache.ini
     if [ ! -f $CONF_PATH ]; then
         touch $CONF_PATH
@@ -127,15 +100,7 @@ EOM
 }
 
 function setup_certs() {
-    read -r -d '' CONFIG << EOM
-SSLEngine On\n
-SSLProtocol all -SSLv2 -SSLv3\n
-SSLCipherSuite ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW\n
-SSLCertificateFile /usr/local/etc/httpd/ssl/local.blee.ch_cert.pem\n
-SSLCertificateKeyFile /usr/local/etc/httpd/ssl/local.blee.ch_privkey.pem\n
-SSLCertificateChainFile /usr/local/etc/httpd/ssl/local.blee.ch_chain.pem\n
-EOM
-
+    CONFIG='SSLEngine On\nSSLProtocol all -SSLv2 -SSLv3\nSSLCipherSuite ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW\nSSLCertificateFile /usr/local/etc/httpd/ssl/local.blee.ch_cert.pem\nSSLCertificateKeyFile /usr/local/etc/httpd/ssl/local.blee.ch_privkey.pem\nSSLCertificateChainFile /usr/local/etc/httpd/ssl/local.blee.ch_chain.pem\n'
     CONF_PATH=$HTTPD_CONF_BASEPATH/ssl/ssl-shared-cert.inc
     if [ ! -f $CONF_PATH ]; then
         mkdir -p $HTTPD_CONF_BASEPATH/ssl
@@ -145,14 +110,9 @@ EOM
 }
 
 function set_dnsmasq_config() {
-    read -r -d '' CONFIG << EOM
-address=/.test/127.0.0.1\\n
-address=/.local.blee.ch/127.0.0.1\\n
-listen-address=127.0.0.1\\n
-port=35353\\n
-EOM
+    CONFIG='address=/.test/127.0.0.1\naddress=/.local.blee.ch/127.0.0.1\nlisten-address=127.0.0.1\nport=35353\n'
     CONF_PATH=$PREFIX/etc/dnsmasq.conf
-    grep -q -F 'local.blee.ch' $CONF_PATH || sed -i'' -e "1s;^;$CONFIG;" $CONF_PATH
+    grep -q -F 'local.blee.ch' $CONF_PATH || echo $CONFIG >> $CONF_PATH
 
     sudo mkdir -p /etc/resolver
     sudo sh -c 'echo "nameserver 127.0.0.1\nport 35353" > /etc/resolver/test'
@@ -160,9 +120,10 @@ EOM
     brew services restart dnsmasq
 }
 
-
+# set -x
 enable_module mpm_event_module
 disable_module mpm_worker_module
+disable_module mpm_prefork_module
 enable_module socache_shmcb_module
 enable_module deflate_module
 enable_module expires_module
