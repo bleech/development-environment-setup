@@ -120,6 +120,7 @@ function set_dnsmasq_config() {
     brew services restart dnsmasq
 }
 
+brew bundle
 # set -x
 enable_module mpm_event_module
 disable_module mpm_worker_module
