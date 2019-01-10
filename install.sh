@@ -71,6 +71,9 @@ function set_php_configs() {
     gsed -i "s,^listen =.*,listen = 127.0.0.1:9072,g" $PREFIX/etc/php/7.2/php-fpm.d/www.conf
     gsed -i "s,^pm =.*,pm = ondemand,g" $PREFIX/etc/php/7.2/php-fpm.d/www.conf
     gsed -i "s,^pm.max_children =.*,pm.max_children = 10,g" $PREFIX/etc/php/7.2/php-fpm.d/www.conf
+    gsed -i "s,^listen =.*,listen = 127.0.0.1:9073,g" $PREFIX/etc/php/7.3/php-fpm.d/www.conf
+    gsed -i "s,^pm =.*,pm = ondemand,g" $PREFIX/etc/php/7.3/php-fpm.d/www.conf
+    gsed -i "s,^pm.max_children =.*,pm.max_children = 10,g" $PREFIX/etc/php/7.3/php-fpm.d/www.conf
 
     
     if [ ! -f $PREFIX/etc/php/7.0/conf.d/ext-opcache.ini ]; then
@@ -82,11 +85,15 @@ function set_php_configs() {
     if [ ! -f $PREFIX/etc/php/7.2/conf.d/ext-opcache.ini ]; then
         touch $PREFIX/etc/php/7.2/conf.d/ext-opcache.ini
     fi
+    if [ ! -f $PREFIX/etc/php/7.3/conf.d/ext-opcache.ini ]; then
+        touch $PREFIX/etc/php/7.3/conf.d/ext-opcache.ini
+    fi
 
     add_opcache_config 5.6
     add_opcache_config 7.0
     add_opcache_config 7.1
     add_opcache_config 7.2
+    add_opcache_config 7.3
 }
 
 function add_opcache_config() {
