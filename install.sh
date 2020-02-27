@@ -35,7 +35,7 @@ function set_directory_index() {
 }
 
 function add_server_config() {
-    CONFIG='ServerName localhost\nProtocols h2 http\/1.1\n<IfModule mod_rewrite.c>\nRewriteEngine On\nRewriteOptions Inherit\n<\/IfModule>\n'
+    CONFIG="ServerName localhost\nProtocols h2 http\/1.1\n<IfModule mod_rewrite.c>\nRewriteEngine On\nRewriteOptions Inherit\n<\/IfModule>\n"
     gsed -i "/^#ServerName/a $CONFIG" $HTTPD_CONF_PATH
 }
 
@@ -54,7 +54,7 @@ function comment_ssl_vhost() {
 }
 
 function add_mysql_config() {
-    CONFIG='max_connections       = 20\nkey_buffer_size       = 16K\nmax_allowed_packet    = 1M\ntable_open_cache      = 4\nsort_buffer_size      = 64K\nread_buffer_size      = 256K\nread_rnd_buffer_size  = 256K\nnet_buffer_length     = 2K\nthread_stack          = 128K\n'
+    CONFIG="max_connections       = 20\nkey_buffer_size       = 16K\nmax_allowed_packet    = 1M\ntable_open_cache      = 4\nsort_buffer_size      = 64K\nread_buffer_size      = 256K\nread_rnd_buffer_size  = 256K\nnet_buffer_length     = 2K\nthread_stack          = 128K\n"
     grep -q -F 'max_connections' $MYSQL_CONF_PATH || echo $CONFIG >> $MYSQL_CONF_PATH
 }
 
@@ -98,7 +98,7 @@ function set_php_configs() {
 
 function add_opcache_config() {
     VERSION=$1
-    CONFIG='opcache.revalidate_freq=0\nopcache.max_accelerated_files=21001\nopcache.memory_consumption=128\nopcache.interned_strings_buffer=16\nopcache.fast_shutdown=1\n'
+    CONFIG="opcache.revalidate_freq=0\nopcache.max_accelerated_files=21001\nopcache.memory_consumption=128\nopcache.interned_strings_buffer=16\nopcache.fast_shutdown=1\n"
     CONF_PATH=$PREFIX/etc/php/$VERSION/conf.d/ext-opcache.ini
     if [ ! -f $CONF_PATH ]; then
         touch $CONF_PATH
@@ -107,7 +107,7 @@ function add_opcache_config() {
 }
 
 function setup_certs() {
-    CONFIG='SSLEngine On\nSSLProtocol all -SSLv2 -SSLv3\nSSLCipherSuite ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW\nSSLCertificateFile /usr/local/etc/httpd/ssl/local.blee.ch_cert.pem\nSSLCertificateKeyFile /usr/local/etc/httpd/ssl/local.blee.ch_privkey.pem\nSSLCertificateChainFile /usr/local/etc/httpd/ssl/local.blee.ch_chain.pem\n'
+    CONFIG="SSLEngine On\nSSLProtocol all -SSLv2 -SSLv3\nSSLCipherSuite ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW\nSSLCertificateFile /usr/local/etc/httpd/ssl/local.blee.ch_cert.pem\nSSLCertificateKeyFile /usr/local/etc/httpd/ssl/local.blee.ch_privkey.pem\nSSLCertificateChainFile /usr/local/etc/httpd/ssl/local.blee.ch_chain.pem\n"
     CONF_PATH=$HTTPD_CONF_BASEPATH/ssl/ssl-shared-cert.inc
     if [ ! -f $CONF_PATH ]; then
         mkdir -p $HTTPD_CONF_BASEPATH/ssl
@@ -117,13 +117,13 @@ function setup_certs() {
 }
 
 function set_dnsmasq_config() {
-    CONFIG='address=/.test/127.0.0.1\naddress=/.local.blee.ch/127.0.0.1\nlisten-address=127.0.0.1\nport=35353\n'
+    CONFIG="address=/.test/127.0.0.1\naddress=/.local.blee.ch/127.0.0.1\nlisten-address=127.0.0.1\nport=35353\n"
     CONF_PATH=$PREFIX/etc/dnsmasq.conf
     grep -q -F 'local.blee.ch' $CONF_PATH || echo $CONFIG >> $CONF_PATH
 
     sudo mkdir -p /etc/resolver
-    sudo sh -c 'echo "nameserver 127.0.0.1\nport 35353" > /etc/resolver/test'
-    sudo sh -c 'echo "nameserver 127.0.0.1\nport 35353" > /etc/resolver/local.blee.ch'
+    sudo sh -c "echo \"nameserver 127.0.0.1\nport 35353\" > /etc/resolver/test"
+    sudo sh -c "echo \"nameserver 127.0.0.1\nport 35353\" > /etc/resolver/local.blee.ch"
     brew services restart dnsmasq
 }
 
